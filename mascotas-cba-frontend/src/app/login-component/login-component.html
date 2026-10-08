@@ -1,0 +1,54 @@
+<main class="login-container container py-5">
+  <div class="row justify-content-center">
+    <div class="col-12 col-sm-10 col-md-7 col-lg-5 col-xl-4">
+      @if (errorMessage()) {
+        <div class="alert alert-danger" role="alert">
+          {{ errorMessage() }}
+        </div>
+      }
+      
+      <section class="card shadow-sm">        
+        <div class="card-body p-4">
+          <h2 class="h4 text-center mb-4">Mascotas Córdoba</h2>
+          <h5>Programa Municipal de Bienestar Animal</h5>
+          <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+            
+            <!-- Campo CUIL -->
+            <div class="mb-3">
+              <label for="cuil" class="form-label">CUIL</label>
+              <input id="cuil" type="text" class="form-control" formControlName="cuil" placeholder="Ingrese su CUIL"/>
+      
+                <!-- Validación condicional -->
+                @if (loginForm.controls.cuil.invalid && loginForm.controls.cuil.touched) {
+                    <p class="text-danger small mt-1 mb-0">
+                    @if (loginForm.controls.cuil.errors?.['pattern']) {
+                        Ingrese un CUIL válido de 11 dígitos numéricos.
+                    }
+                    </p>
+                }
+            </div>
+
+
+            <!-- Campo clave -->
+            <div class="mb-4">
+              <label for="clave" class="form-label">Contraseña</label>
+              <input id="clave" type="password" class="form-control" formControlName="clave" placeholder="Ingrese su clave"/>
+
+                @if (loginForm.controls.clave.invalid && loginForm.controls.clave.touched) {
+                    <p class="text-danger small mt-1 mb-0">
+                        @if (loginForm.controls.clave.errors?.['minlength']) {
+                            La contraseña debe tener al menos 6 caracteres.
+                        }
+                    </p>
+                }
+            </div>
+            
+            <!-- Botón de Envío -->
+            <button class="btn btn-success w-100" type="submit" [disabled]="loginForm.invalid"> Ingresar</button>
+          
+        </form>
+        </div>
+      </section>
+    </div>
+  </div>
+</main>
