@@ -1,0 +1,116 @@
+<div class="modal d-block" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="tituloNuevaPublicacion">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable modal-fullscreen-sm-down">
+    <form class="modal-content" [formGroup]="publicacionForm" (ngSubmit)="onSubmit()">
+
+      <div class="modal-header bg-success text-white">
+        <h2 class="modal-title h5" id="tituloNuevaPublicacion">Nueva publicación de adopción</h2>
+        <button type="button" class="btn-close btn-close-white" aria-label="Cerrar" (click)="cancelada.emit()"></button>
+      </div>
+
+      <div class="modal-body">
+        @if (errorMessage()) {
+          <div class="alert alert-danger" role="alert">{{ errorMessage() }}</div>
+        }
+
+        <!-- Información de la mascota -->
+        <h3 class="h6 fw-bold mb-3">Información de la mascota</h3>
+
+        <div class="mb-3">
+          <label for="nombre" class="form-label">Nombre <span class="text-danger">*</span></label>
+          <input id="nombre" type="text" class="form-control" formControlName="nombre" placeholder="Ej: Manchita"
+                 [class.is-invalid]="esInvalido('nombre')" />
+          <div class="invalid-feedback">El nombre es obligatorio (máximo 100 caracteres).</div>
+        </div>
+
+        <div class="row g-3 mb-3">
+          <div class="col-12 col-md-4">
+            <label for="especie" class="form-label">Especie <span class="text-danger">*</span></label>
+            <select id="especie" class="form-select" formControlName="especie" [class.is-invalid]="esInvalido('especie')">
+              <option value="" disabled>Seleccionar...</option>
+              @for (especie of especies; track especie) {
+                <option [value]="especie">{{ especie }}</option>
+              }
+            </select>
+            <div class="invalid-feedback">Seleccione la especie.</div>
+          </div>
+
+          <div class="col-12 col-md-4">
+            <label for="sexo" class="form-label">Sexo <span class="text-danger">*</span></label>
+            <select id="sexo" class="form-select" formControlName="sexo" [class.is-invalid]="esInvalido('sexo')">
+              <option value="" disabled>Seleccionar...</option>
+              @for (sexo of sexos; track sexo) {
+                <option [value]="sexo">{{ sexo }}</option>
+              }
+            </select>
+            <div class="invalid-feedback">Seleccione el sexo.</div>
+          </div>
+
+          <div class="col-12 col-md-4">
+            <label for="edadAproximada" class="form-label">Edad aproximada</label>
+            <input id="edadAproximada" type="text" class="form-control" formControlName="edadAproximada"
+                   placeholder="Ej: 2 años" [class.is-invalid]="esInvalido('edadAproximada')" />
+            <div class="invalid-feedback">Ingrese un número, por ejemplo: 2 años o 6 meses.</div>
+          </div>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-12 col-md-6">
+            <label for="raza" class="form-label">Raza</label>
+            <input id="raza" type="text" class="form-control" formControlName="raza" placeholder="Ej: Mestizo"
+                   [class.is-invalid]="esInvalido('raza')" />
+            <div class="invalid-feedback">Máximo 200 caracteres.</div>
+          </div>
+        </div>
+
+        <hr />
+
+        <!-- Descripción de la publicación -->
+        <h3 class="h6 fw-bold mb-3">Descripción de la publicación</h3>
+
+        <div class="mb-3">
+          <label for="caracteristicasMascota" class="form-label">Descripción general <span class="text-danger">*</span></label>
+          <textarea id="caracteristicasMascota" class="form-control" rows="3" formControlName="caracteristicasMascota"
+                    placeholder="Contá cómo es la mascota, su personalidad, comportamiento y características..."
+                    [class.is-invalid]="esInvalido('caracteristicasMascota')"></textarea>
+          <div class="invalid-feedback">La descripción es obligatoria (máximo 500 caracteres).</div>
+        </div>
+
+        <div class="mb-3">
+          <label for="condicionAdopcion" class="form-label">Condiciones básicas de adopción <span class="text-danger">*</span></label>
+          <textarea id="condicionAdopcion" class="form-control" rows="2" formControlName="condicionAdopcion"
+                    placeholder="Ej: Se requiere entrevista previa y compromiso de tenencia responsable."
+                    [class.is-invalid]="esInvalido('condicionAdopcion')"></textarea>
+          <div class="invalid-feedback">Las condiciones son obligatorias (máximo 300 caracteres).</div>
+        </div>
+
+        <hr />
+
+        <!-- Fotografía -->
+        <h3 class="h6 fw-bold mb-3">Fotografía</h3>
+
+        <div class="mb-2">
+          <label for="foto" class="form-label">Imagen de la mascota <span class="text-danger">*</span></label>
+          <input id="foto" type="file" class="form-control" accept="image/*" (change)="onFotoSeleccionada($event)"
+                 [class.is-invalid]="esInvalido('foto')" />
+          <div class="invalid-feedback">La fotografía es obligatoria.</div>
+          <div class="form-text">La fotografía ayuda a facilitar el proceso de adopción.</div>
+        </div>
+
+        @if (vistaPrevia()) {
+          <img [src]="vistaPrevia()" alt="Vista previa de la fotografía" class="vista-previa rounded border" />
+        }
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="cancelada.emit()" [disabled]="enviando()">Cancelar</button>
+        <button type="submit" class="btn btn-success" [disabled]="enviando()">
+          @if (enviando()) {
+            <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>
+          }
+          Publicar mascota
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+<div class="modal-backdrop show"></div>

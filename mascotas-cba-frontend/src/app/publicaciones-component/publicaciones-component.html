@@ -1,0 +1,131 @@
+<app-navbar />
+
+<main class="container py-4">
+
+  <!-- Encabezado -->
+  <section class="card shadow-sm border-0 mb-3">
+    <div class="card-body p-4 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+      <div>
+        <span class="badge text-bg-success mb-2">Gestión de publicaciones</span>
+        <h1 class="h2 fw-bold mb-1">Mis publicaciones de adopción</h1>
+        <p class="text-muted mb-0">Administrá las mascotas disponibles para adopción del refugio.</p>
+      </div>
+      <button type="button" class="btn btn-success" (click)="abrirFormulario()">+ Nueva publicación</button>
+    </div>
+  </section>
+
+  <!-- Filtros -->
+  <section class="card shadow-sm border-0 mb-3">
+    <div class="card-body row g-3 align-items-end">
+      <div class="col-12 col-md-6">
+        <label for="buscar" class="form-label small">Buscar mascota</label>
+        <input id="buscar" type="search" class="form-control" placeholder="Nombre de la mascota..."
+               [value]="filtroNombre()" (input)="onFiltroNombre($event)" />
+      </div>
+      <div class="col-12 col-md-4">
+        <label for="estado" class="form-label small">Estado</label>
+        <select id="estado" class="form-select" [value]="filtroEstado()" (change)="onFiltroEstado($event)">
+          <option value="">Todos</option>
+          @for (estado of estados; track estado) {
+            <option [value]="estado">{{ estadoTexto(estado) }}</option>
+          }
+        </select>
+      </div>
+      <div class="col-12 col-md-2 text-md-end small text-muted">
+        Publicaciones: <strong class="text-body">{{ publicacionesFiltradas().length }}</strong>
+      </div>
+    </div>
+  </section>
+
+  <!-- Mensajes -->
+  @if (errorMessage()) {
+    <div class="alert alert-danger alert-dismissible" role="alert">
+      {{ errorMessage() }}
+      <button type="button" class="btn-close" aria-label="Cerrar" (click)="errorMessage.set(null)"></button>
+    </div>
+  }
+  @if (successMessage()) {
+    <div class="alert alert-success alert-dismissible" role="status">
+      {{ successMessage() }}
+      <button type="button" class="btn-close" aria-label="Cerrar" (click)="successMessage.set(null)"></button>
+    </div>
+  }
+
+  <!-- Listado -->
+  @if (cargando()) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-success" role="status"><span class="visually-hidden">Cargando...</span></div>
+    </div>
+  } @else if (publicacionesFiltradas().length === 0) {
+    <div class="card shadow-sm border-0">
+      <div class="card-body text-center text-muted py-5">
+        @if (publicaciones().length === 0) {
+          Todavía no hay publicaciones. Creá la primera con <strong>Nueva publicación</strong>.
+        } @else {
+          No hay publicaciones que coincidan con los filtros.
+        }
+      </div>
+    </div>
+  } @else {
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+      @for (publicacion of publicacionesFiltradas(); track publicacion.nroRegMunicipal) {
+        <div class="col">
+          <article class="card h-100 shadow-sm border-0 publicacion"
+                   [class.finalizada]="publicacion.estadoPublicacion === 'FINALIZADA'">
+            <div class="position-relative">
+              <img [src]="fotoUrl(publicacion.foto)" [alt]="'Foto de ' + publicacion.nombre"
+                   class="card-img-top foto" (error)="onFotoError($event)" />
+              <span class="badge position-absolute top-0 end-0 m-2" [class]="estadoClase(publicacion.estadoPublicacion)">
+                {{ estadoTexto(publicacion.estadoPublicacion) }}
+              </span>
+            </div>
+
+            <div class="card-body d-flex flex-column">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <h2 class="h5 fw-bold mb-0">{{ publicacion.nombre }}</h2>
+                  <small class="text-muted">NRM: {{ publicacion.nroRegMunicipal }}</small>
+                </div>
+                <span class="badge text-bg-light border">{{ publicacion.especie }}</span>
+              </div>
+
+              <hr class="my-2" />
+
+              <div class="d-flex flex-wrap gap-2 mb-2">
+                <span class="badge rounded-pill text-bg-light border fw-normal">{{ sexoTexto(publicacion.sexo) }}</span>
+                <span class="badge rounded-pill text-bg-light border fw-normal">{{ edadTexto(publicacion.edad) }}</span>
+                @if (publicacion.raza) {
+                  <span class="badge rounded-pill text-bg-light border fw-normal">{{ publicacion.raza }}</span>
+                }
+              </div>
+
+              <p class="small mb-2">{{ publicacion.caracteristicasMascota }}</p>
+              <p class="small text-muted mb-3">
+                <strong>Condiciones:</strong> {{ publicacion.condicionAdopcion }}
+              </p>
+
+              <!-- Solo se muestran las acciones válidas para el estado actual -->
+              @if (accionesDisponibles(publicacion).length > 0) {
+                <div class="mt-auto d-flex justify-content-end gap-2">
+                  @for (accion of accionesDisponibles(publicacion); track accion) {
+                    <button type="button" class="btn btn-sm" [class]="accionClase(accion)"
+                            [disabled]="procesando() === publicacion.nroRegMunicipal"
+                            (click)="cambiarEstado(publicacion, accion)">
+                      {{ accionTexto(accion) }}
+                    </button>
+                  }
+                </div>
+              } @else {
+                <p class="mt-auto mb-0 small text-muted text-end">Publicación finalizada</p>
+              }
+            </div>
+          </article>
+        </div>
+      }
+    </div>
+  }
+</main>
+
+@if (mostrarFormulario()) {
+  <app-nueva-publicacion (publicada)="onPublicada()" (cancelada)="mostrarFormulario.set(false)" />
+}
