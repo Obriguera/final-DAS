@@ -16,11 +16,9 @@ DROP TABLE IF EXISTS dbo.veterinarias;
 DROP TABLE IF EXISTS dbo.ciudadanos;
 GO
 
-
 /* ----------------         TABLAS            ---------------------*/
 
-
-CREATE TABLE ciudadanos (
+CREATE TABLE dbo.ciudadanos (
     id_ciudadano    INT             NOT NULL,
     apellido        VARCHAR(100)    NOT NULL,
     nombre          VARCHAR(100)    NOT NULL,
@@ -39,8 +37,7 @@ CREATE TABLE ciudadanos (
 );
 GO
 
-
-CREATE TABLE veterinarias (
+CREATE TABLE dbo.veterinarias (
     id_veterinaria          INT             NOT NULL,
     razon_social            VARCHAR(150)    NOT NULL,
     correo                  VARCHAR(150),
@@ -53,8 +50,7 @@ CREATE TABLE veterinarias (
 );
 GO
 
-
-CREATE TABLE refugios (
+CREATE TABLE dbo.refugios (
     id_refugio              INT             NOT NULL,
     razon_social            VARCHAR(150)    NOT NULL,
     correo                  VARCHAR(150),
@@ -68,13 +64,11 @@ CREATE TABLE refugios (
 
     CONSTRAINT fk_refugios_ciudadanos
         FOREIGN KEY (id_responsable)
-        REFERENCES ciudadanos (id_ciudadano)
+        REFERENCES dbo.ciudadanos (id_ciudadano)
 );
 GO
 
-
-
-CREATE TABLE rasgos_mascotas (
+CREATE TABLE dbo.rasgos_mascotas (
     cod_rasgo   INT             NOT NULL,
     nom_rasgo   VARCHAR(100)    NOT NULL,
 
@@ -83,8 +77,7 @@ CREATE TABLE rasgos_mascotas (
 );
 GO
 
-
-CREATE TABLE dominio_rasgos_mascotas (
+CREATE TABLE dbo.dominio_rasgos_mascotas (
     cod_rasgo            INT             NOT NULL,
     nro_valor_dominio    INT             NOT NULL,
     nom_valor_dominio    VARCHAR(100)    NOT NULL,
@@ -94,16 +87,15 @@ CREATE TABLE dominio_rasgos_mascotas (
 
     CONSTRAINT fk_dominiorasgos_rasgos
         FOREIGN KEY (cod_rasgo)
-        REFERENCES rasgos_mascotas (cod_rasgo)
+        REFERENCES dbo.rasgos_mascotas (cod_rasgo)
 );
 GO
 
-
-CREATE TABLE mascotas (
+CREATE TABLE dbo.mascotas (
     nro_reg_municipal   VARCHAR(30)     NOT NULL,
     nombre              VARCHAR(100)    NOT NULL,
     sexo                CHAR(1),
-    año_nacimiento      INT,
+    [aï¿½o_nacimiento]    INT,
     microchip           VARCHAR(50),
     vive                CHAR(1)         DEFAULT 'S',
     id_responsable      INT,
@@ -114,16 +106,15 @@ CREATE TABLE mascotas (
 
     CONSTRAINT fk_mascotas_ciudadanos
         FOREIGN KEY (id_responsable)
-        REFERENCES ciudadanos (id_ciudadano),
+        REFERENCES dbo.ciudadanos (id_ciudadano),
 
     CONSTRAINT fk_mascotas_refugios
         FOREIGN KEY (id_refugio)
-        REFERENCES refugios (id_refugio)
+        REFERENCES dbo.refugios (id_refugio)
 );
 GO
 
-
-CREATE TABLE caracteristicas_mascotas (
+CREATE TABLE dbo.caracteristicas_mascotas (
     nro_reg_municipal     VARCHAR(30)     NOT NULL,
     cod_rasgo             INT             NOT NULL,
     nro_caracteristica    INT             NOT NULL,
@@ -139,21 +130,20 @@ CREATE TABLE caracteristicas_mascotas (
 
     CONSTRAINT fk_caracmasc_mascotas
         FOREIGN KEY (nro_reg_municipal)
-        REFERENCES mascotas (nro_reg_municipal),
+        REFERENCES dbo.mascotas (nro_reg_municipal),
 
     CONSTRAINT fk_caracmasc_rasgos
         FOREIGN KEY (cod_rasgo)
-        REFERENCES rasgos_mascotas (cod_rasgo),
+        REFERENCES dbo.rasgos_mascotas (cod_rasgo),
 
     CONSTRAINT fk_caracmasc_dominio
         FOREIGN KEY (cod_rasgo, nro_valor_dominio)
-        REFERENCES dominio_rasgos_mascotas
+        REFERENCES dbo.dominio_rasgos_mascotas
             (cod_rasgo, nro_valor_dominio)
 );
 GO
 
-
-CREATE TABLE profesionales_veterinarias (
+CREATE TABLE dbo.profesionales_veterinarias (
     id_veterinaria  INT         NOT NULL,
     id_profesional  INT         NOT NULL,
     baja            CHAR(1)     DEFAULT 'N',
@@ -166,40 +156,38 @@ CREATE TABLE profesionales_veterinarias (
 
     CONSTRAINT fk_profvet_veterinarias
         FOREIGN KEY (id_veterinaria)
-        REFERENCES veterinarias (id_veterinaria),
+        REFERENCES dbo.veterinarias (id_veterinaria),
 
     CONSTRAINT fk_profvet_ciudadanos
         FOREIGN KEY (id_profesional)
-        REFERENCES ciudadanos (id_ciudadano)
+        REFERENCES dbo.ciudadanos (id_ciudadano)
 );
 GO
 
-
-CREATE TABLE publicaciones_adopcion (
+CREATE TABLE dbo.publicaciones_adopcion (
     nro_publicacion          INT             NOT NULL,
-    nro_reg_municipal       VARCHAR(30)     NOT NULL,
+    nro_reg_municipal        VARCHAR(30)     NOT NULL,
     id_refugio               INT,
     fecha_publicacion        DATE            NOT NULL,
-    caracteristicas_mascota VARCHAR(500),
-    condicion_adopcion      VARCHAR(300),
+    caracteristicas_mascota  VARCHAR(500),
+    condicion_adopcion       VARCHAR(300),
     foto                     VARCHAR(300),
-    estado_publicacion      VARCHAR(30),
+    estado_publicacion       VARCHAR(30),
 
     CONSTRAINT pk_publicaciones_adopcion
         PRIMARY KEY (nro_publicacion),
 
     CONSTRAINT fk_publadop_mascotas
         FOREIGN KEY (nro_reg_municipal)
-        REFERENCES mascotas (nro_reg_municipal),
+        REFERENCES dbo.mascotas (nro_reg_municipal),
 
     CONSTRAINT fk_publadop_refugios
         FOREIGN KEY (id_refugio)
-        REFERENCES refugios (id_refugio)
+        REFERENCES dbo.refugios (id_refugio)
 );
 GO
 
-
-CREATE TABLE tipos_atencion_sanitaria (
+CREATE TABLE dbo.tipos_atencion_sanitaria (
     cod_tipo_atencion   INT             NOT NULL,
     desc_tipo_atencion  VARCHAR(100)    NOT NULL,
 
@@ -208,8 +196,7 @@ CREATE TABLE tipos_atencion_sanitaria (
 );
 GO
 
-
-CREATE TABLE informacion_sanitaria (
+CREATE TABLE dbo.informacion_sanitaria (
     nro_reg_municipal   VARCHAR(30)     NOT NULL,
     nro_registro        INT             NOT NULL,
     fecha_atencion      DATE            NOT NULL,
@@ -227,29 +214,28 @@ CREATE TABLE informacion_sanitaria (
 
     CONSTRAINT fk_infosan_mascotas
         FOREIGN KEY (nro_reg_municipal)
-        REFERENCES mascotas (nro_reg_municipal),
+        REFERENCES dbo.mascotas (nro_reg_municipal),
 
     CONSTRAINT fk_infosan_tipos
         FOREIGN KEY (cod_tipo_atencion)
-        REFERENCES tipos_atencion_sanitaria (cod_tipo_atencion),
+        REFERENCES dbo.tipos_atencion_sanitaria (cod_tipo_atencion),
 
     CONSTRAINT fk_infosan_veterinarias
         FOREIGN KEY (id_veterinaria)
-        REFERENCES veterinarias (id_veterinaria),
+        REFERENCES dbo.veterinarias (id_veterinaria),
 
     CONSTRAINT fk_infosan_profesionales
         FOREIGN KEY (id_profesional)
-        REFERENCES ciudadanos (id_ciudadano),
+        REFERENCES dbo.ciudadanos (id_ciudadano),
 
     CONSTRAINT fk_infosan_profvet
         FOREIGN KEY (id_veterinaria, id_profesional)
-        REFERENCES profesionales_veterinarias
+        REFERENCES dbo.profesionales_veterinarias
             (id_veterinaria, id_profesional)
 );
 GO
 
-
-CREATE TABLE atributos_sistema (
+CREATE TABLE dbo.atributos_sistema (
     cod_atributo     INT             NOT NULL,
     desc_atributo    VARCHAR(100)    NOT NULL,
     tipo_dato        VARCHAR(30),
@@ -260,7 +246,7 @@ CREATE TABLE atributos_sistema (
 );
 GO
 
-CREATE TABLE configuracion_veterinarias (
+CREATE TABLE dbo.configuracion_veterinarias (
     id_veterinaria  INT             NOT NULL,
     cod_atributo    INT             NOT NULL,
     valor           VARCHAR(200),
@@ -273,11 +259,11 @@ CREATE TABLE configuracion_veterinarias (
 
     CONSTRAINT fk_confvet_veterinarias
         FOREIGN KEY (id_veterinaria)
-        REFERENCES veterinarias (id_veterinaria),
+        REFERENCES dbo.veterinarias (id_veterinaria),
 
     CONSTRAINT fk_confvet_atributos
         FOREIGN KEY (cod_atributo)
-        REFERENCES atributos_sistema (cod_atributo)
+        REFERENCES dbo.atributos_sistema (cod_atributo)
 );
 GO
 
@@ -359,7 +345,7 @@ VALUES
 GO
 
 INSERT INTO dbo.mascotas
-    (nro_reg_municipal, nombre, sexo, año_nacimiento, microchip, vive, id_responsable, id_refugio)
+    (nro_reg_municipal, nombre, sexo, aï¿½o_nacimiento, microchip, vive, id_responsable, id_refugio)
 VALUES
     ('MUN-000001', 'Luna', 'H', 2021, '985141000001', 'S', 100001, NULL),
     ('MUN-000002', 'Toby', 'M', 2020, '985141000002', 'S', 100002, NULL),
