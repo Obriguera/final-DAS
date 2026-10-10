@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
-import { LoginResource } from '../services/login-resource';
-import { SesionService } from '../services/sesion-service';
+import { LoginResource } from '../../services/login-resource';
+import { SesionService } from '../../services/sesion-service';
 import { Router } from '@angular/router';
 
 @Component({
@@ -50,7 +50,7 @@ export class LoginComponent {
             return;
           }
 
-          this.sesion.iniciar({
+          this.sesion.setSesion({
             cuil,
             idCiudadano: response.idCiudadano,
             idRefugio: response.idRefugio,

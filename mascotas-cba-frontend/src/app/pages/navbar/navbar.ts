@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { SesionService } from '../services/sesion-service';
+import { SesionService } from '../../services/sesion-service';
 
 @Component({
   imports: [RouterLink],
@@ -14,7 +14,7 @@ export class Navbar {
   protected sesion = this.sesionService.sesion;
 
   cerrarSesion(): void {
-    this.sesionService.cerrar();
+    this.sesionService.logout();
     this.router.navigate(['/']);
   }
 }

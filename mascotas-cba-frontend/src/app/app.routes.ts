@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
-import { LoginComponent } from './login-component/login-component';
-import { PublicacionesComponent } from './publicaciones-component/publicaciones-component';
+import { LoginComponent } from './pages/login-component/login-component';
+import { PublicacionesComponent } from './pages/publicaciones-component/publicaciones-component';
 import { refugioGuard } from './guards/refugio-guard';
 
 

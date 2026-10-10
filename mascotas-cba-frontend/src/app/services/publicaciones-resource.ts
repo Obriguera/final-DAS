@@ -41,7 +41,6 @@ export interface IResultadoPublicacion {
   estadoPublicacion?: EstadoPublicacion;
 }
 
-// Los headers X-Id-Ciudadano y X-Id-Refugio los agrega apiKeyInterceptor.
 @Injectable()
 export class PublicacionesResource {
   private http = inject(HttpClient);

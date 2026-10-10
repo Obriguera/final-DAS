@@ -1,6 +1,6 @@
 import { Component, OnDestroy, inject, output, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { PublicacionesResource } from '../services/publicaciones-resource';
+import { PublicacionesResource } from '../../services/publicaciones-resource';
 
 @Component({
   imports: [ReactiveFormsModule],

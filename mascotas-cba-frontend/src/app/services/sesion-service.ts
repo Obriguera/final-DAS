@@ -1,34 +1,44 @@
-import { Injectable, PLATFORM_ID, inject, signal } from '@angular/core';
+import { computed, inject, Injectable, PLATFORM_ID, signal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 
-export interface ISesion {
-  cuil: string;
-  idCiudadano: string;
-  idRefugio: string | null;
-  razonSocial: string | null;
+export interface UsuarioSesion {
+  cuil?: string | null;
+  idCiudadano?: string | null;
+  idRefugio?: string | null;
+  idVeterinaria?: string | null;
+  razonSocial?: string | null;
   rol: string;
 }
 
-// Mantiene el contexto del usuario autenticado durante la navegación.
-@Injectable({ providedIn: 'root' })
+@Injectable()
 export class SesionService {
-  private readonly KEY = 'sesion';
-  private readonly esNavegador = isPlatformBrowser(inject(PLATFORM_ID));
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly STORAGE_KEY = 'sesion';
 
-  readonly sesion = signal<ISesion | null>(this.leer());
+  private get storage(): Storage | null {
+    return isPlatformBrowser(this.platformId) ? sessionStorage : null;
+  }
 
-  iniciar(sesion: ISesion): void {
-    if (this.esNavegador) {
-      localStorage.setItem(this.KEY, JSON.stringify(sesion));
-    }
+  readonly sesion = signal<UsuarioSesion | null>(this.leer());
+  readonly autenticado = computed(() => !!this.sesion()?.rol);
+
+  setSesion(sesion: UsuarioSesion): void {
+    this.storage?.setItem(this.STORAGE_KEY, JSON.stringify(sesion));
     this.sesion.set(sesion);
   }
 
-  cerrar(): void {
-    if (this.esNavegador) {
-      localStorage.removeItem(this.KEY);
-    }
+  logout(): void {
+    this.storage?.removeItem(this.STORAGE_KEY);
     this.sesion.set(null);
+  }
+
+  isAuthenticated(): boolean {
+    return this.autenticado();
+  }
+
+  hasRole(rolesPermitidos: string[]): boolean {
+    const rol = this.sesion()?.rol;
+    return !!rol && rolesPermitidos.includes(rol);
   }
 
   esRefugio(): boolean {
@@ -36,13 +46,12 @@ export class SesionService {
     return sesion?.rol === 'REFUGIO' && !!sesion.idRefugio;
   }
 
-  private leer(): ISesion | null {
-    if (!this.esNavegador) {
-      return null;
-    }
+  private leer(): UsuarioSesion | null {
+    const data = this.storage?.getItem(this.STORAGE_KEY);
+    if (!data) return null;
     try {
-      const guardada = localStorage.getItem(this.KEY);
-      return guardada ? (JSON.parse(guardada) as ISesion) : null;
+      const parsed = JSON.parse(data);
+      return typeof parsed?.rol === 'string' ? (parsed as UsuarioSesion) : null;
     } catch {
       return null;
     }

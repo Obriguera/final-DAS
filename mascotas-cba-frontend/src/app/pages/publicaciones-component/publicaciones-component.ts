@@ -7,8 +7,8 @@ import {
   EstadoPublicacion,
   IPublicacion,
   PublicacionesResource,
-} from '../services/publicaciones-resource';
-import { SesionService } from '../services/sesion-service';
+} from '../../services/publicaciones-resource';
+import { SesionService } from '../../services/sesion-service';
 
 // Acciones permitidas según el estado actual (FINALIZADA es terminal)
 const ACCIONES_POR_ESTADO: Record<EstadoPublicacion, AccionPublicacion[]> = {
@@ -181,7 +181,7 @@ export class PublicacionesComponent implements OnInit {
   private manejarError(error: { status?: number; error?: { mensaje?: string } }, porDefecto: string): void {
     // El backend responde 403 cuando el usuario ya no es responsable del refugio
     if (error.status === 403) {
-      this.sesion.cerrar();
+      this.sesion.logout();
       this.router.navigate(['/']);
       return;
     }
