@@ -163,8 +163,24 @@ export class PublicacionesComponent implements OnInit {
     return edad === 1 ? '1 año' : `${edad} años`;
   }
 
-  // Las fotos se sirven desde public/img; si es una URL completa se usa tal cual
-  fotoUrl(foto: string): string {
+  // Las fotos se buscan en localStorage (Base64 local); si no, se sirven desde public/img
+  fotoUrl(item: IPublicacion | string): string {
+    if (!item) {
+      return FOTO_POR_DEFECTO;
+    }
+
+    if (typeof item !== 'string' && typeof localStorage !== 'undefined') {
+      const fotoLocal =
+        (item.nroRegMunicipal ? localStorage.getItem(`foto_${item.nroRegMunicipal}`) : null) ??
+        (item.nroPublicacion ? localStorage.getItem(`foto_${item.nroPublicacion}`) : null) ??
+        (item.nombre ? localStorage.getItem(`foto_${item.nombre.trim().toLowerCase()}`) : null);
+
+      if (fotoLocal) {
+        return fotoLocal;
+      }
+    }
+
+    const foto = typeof item === 'string' ? item : item.foto;
     if (!foto) {
       return FOTO_POR_DEFECTO;
     }

@@ -21,6 +21,7 @@ export class NuevaPublicacion implements OnDestroy {
   errorMessage = signal<string | null>(null);
   enviando = signal(false);
   vistaPrevia = signal<string | null>(null);
+  private fotoBase64: string | null = null;
 
   publicacionForm = new FormGroup({
     nombre: new FormControl<string>('', {
@@ -50,16 +51,56 @@ export class NuevaPublicacion implements OnDestroy {
   });
 
   onFotoSeleccionada(event: Event): void {
-    const archivo = (event.target as HTMLInputElement).files?.[0];
+    const input = event.target as HTMLInputElement;
+    const archivo = input.files?.[0];
     this.liberarVistaPrevia();
+    this.fotoBase64 = null;
 
     if (!archivo) {
       this.publicacionForm.controls.foto.setValue('');
     } else {
       this.publicacionForm.controls.foto.setValue(archivo.name);
-      this.vistaPrevia.set(URL.createObjectURL(archivo));
+      this.procesarImagen(archivo);
     }
     this.publicacionForm.controls.foto.markAsTouched();
+  }
+
+  private procesarImagen(archivo: File): void {
+    const lector = new FileReader();
+    lector.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        // Redimensionar para optimizar espacio en localStorage (máx 600px)
+        const MAX_DIM = 600;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height && width > MAX_DIM) {
+          height = Math.round((height * MAX_DIM) / width);
+          width = MAX_DIM;
+        } else if (height > MAX_DIM) {
+          width = Math.round((width * MAX_DIM) / height);
+          height = MAX_DIM;
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, width, height);
+          const base64 = canvas.toDataURL('image/jpeg', 0.85);
+          this.fotoBase64 = base64;
+          this.vistaPrevia.set(base64);
+        } else {
+          const raw = e.target?.result as string;
+          this.fotoBase64 = raw;
+          this.vistaPrevia.set(raw);
+        }
+      };
+      img.src = e.target?.result as string;
+    };
+    lector.readAsDataURL(archivo);
   }
 
   esInvalido(campo: keyof typeof this.publicacionForm.controls): boolean {
@@ -76,8 +117,27 @@ export class NuevaPublicacion implements OnDestroy {
     }
 
     this.enviando.set(true);
-    this.publicacionesResource.crearPublicacion(this.publicacionForm.getRawValue()).subscribe({
-      next: () => {
+    const datos = this.publicacionForm.getRawValue();
+
+    this.publicacionesResource.crearPublicacion(datos).subscribe({
+      next: (resultado) => {
+        // Almacenar la foto localmente en el navegador (Base64)
+        if (this.fotoBase64 && typeof localStorage !== 'undefined') {
+          try {
+            const nombreNormalizado = datos.nombre.trim().toLowerCase();
+            localStorage.setItem(`foto_${nombreNormalizado}`, this.fotoBase64);
+
+            if (resultado?.nroRegMunicipal) {
+              localStorage.setItem(`foto_${resultado.nroRegMunicipal}`, this.fotoBase64);
+            }
+            if (resultado?.nroPublicacion) {
+              localStorage.setItem(`foto_${resultado.nroPublicacion}`, this.fotoBase64);
+            }
+          } catch (e) {
+            console.warn('No se pudo guardar la foto en localStorage:', e);
+          }
+        }
+
         this.enviando.set(false);
         this.publicada.emit();
       },
@@ -95,9 +155,9 @@ export class NuevaPublicacion implements OnDestroy {
 
   private liberarVistaPrevia(): void {
     const url = this.vistaPrevia();
-    if (url) {
+    if (url && url.startsWith('blob:')) {
       URL.revokeObjectURL(url);
-      this.vistaPrevia.set(null);
     }
+    this.vistaPrevia.set(null);
   }
 }
