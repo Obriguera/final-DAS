@@ -27,7 +27,7 @@
             <label for="especie" class="form-label">Especie <span class="text-danger">*</span></label>
             <select id="especie" class="form-select" formControlName="especie" [class.is-invalid]="esInvalido('especie')">
               <option value="" disabled>Seleccionar...</option>
-              @for (especie of especies; track especie) {
+              @for (especie of especies(); track especie) {
                 <option [value]="especie">{{ especie }}</option>
               }
             </select>
@@ -38,8 +38,8 @@
             <label for="sexo" class="form-label">Sexo <span class="text-danger">*</span></label>
             <select id="sexo" class="form-select" formControlName="sexo" [class.is-invalid]="esInvalido('sexo')">
               <option value="" disabled>Seleccionar...</option>
-              @for (sexo of sexos; track sexo) {
-                <option [value]="sexo">{{ sexo }}</option>
+              @for (sexo of sexos(); track sexo.codigo) {
+                <option [value]="sexo.codigo">{{ sexo.nombre }}</option>
               }
             </select>
             <div class="invalid-feedback">Seleccione el sexo.</div>
@@ -56,9 +56,12 @@
         <div class="row mb-3">
           <div class="col-12 col-md-6">
             <label for="raza" class="form-label">Raza</label>
-            <input id="raza" type="text" class="form-control" formControlName="raza" placeholder="Ej: Mestizo"
-                   [class.is-invalid]="esInvalido('raza')" />
-            <div class="invalid-feedback">Máximo 200 caracteres.</div>
+            <select id="raza" class="form-select" formControlName="raza">
+              <option value="">Sin especificar</option>
+              @for (raza of razas(); track raza) {
+                <option [value]="raza">{{ raza }}</option>
+              }
+            </select>
           </div>
         </div>
 

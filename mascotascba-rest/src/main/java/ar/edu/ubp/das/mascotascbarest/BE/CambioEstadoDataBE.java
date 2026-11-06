@@ -2,14 +2,14 @@ package ar.edu.ubp.das.mascotascbarest.BE;
 
 public class CambioEstadoDataBE {
 
-    private String nroPublicacion;
+    private Integer nroPublicacion;
     private String accion;
 
-    public String getNroPublicacion() {
+    public Integer getNroPublicacion() {
         return nroPublicacion;
     }
 
-    public void setNroPublicacion(String nroPublicacion) {
+    public void setNroPublicacion(Integer nroPublicacion) {
         this.nroPublicacion = nroPublicacion;
     }
 

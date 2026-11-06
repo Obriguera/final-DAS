@@ -4,10 +4,8 @@ import { Observable } from 'rxjs';
 import { environment } from '../environments/environments';
 
 export interface ILoginResponse {
-  cuil: string | null;
-  idCiudadano: string;
-  idRefugio: string | null;
-  idVeterinaria: string | null;
+  apellido: string | null;
+  nombre: string | null;
   razonSocial: string | null;
   rol: string;
 }

@@ -1,11 +1,20 @@
 package ar.edu.ubp.das.mascotascbarest.BE;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class LoginDataBE {
+
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String cuil;
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String clave;
-    private String idCiudadano;
-    private String idRefugio;
-    private String idVeterinaria;
+    @JsonIgnore
+    private Integer idCiudadano;
+    @JsonIgnore
+    private Integer idRefugio;
+    private String apellido;
+    private String nombre;
     private String razonSocial;
     private String rol;
 
@@ -25,28 +34,36 @@ public class LoginDataBE {
         this.clave = clave;
     }
 
-    public String getIdCiudadano() {
+    public Integer getIdCiudadano() {
         return idCiudadano;
     }
 
-    public void setIdCiudadano(String idCiudadano) {
+    public void setIdCiudadano(Integer idCiudadano) {
         this.idCiudadano = idCiudadano;
     }
 
-    public String getIdRefugio() {
+    public Integer getIdRefugio() {
         return idRefugio;
     }
 
-    public void setIdRefugio(String idRefugio) {
+    public void setIdRefugio(Integer idRefugio) {
         this.idRefugio = idRefugio;
     }
 
-    public String getIdVeterinaria() {
-        return idVeterinaria;
+    public String getApellido() {
+        return apellido;
     }
 
-    public void setIdVeterinaria(String idVeterinaria) {
-        this.idVeterinaria = idVeterinaria;
+    public void setApellido(String apellido) {
+        this.apellido = apellido;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
     }
 
     public String getRazonSocial() {

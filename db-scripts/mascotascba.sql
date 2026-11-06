@@ -1,6 +1,6 @@
 USE mascotascba;
 GO
-
+/*
 DROP TABLE IF EXISTS dbo.configuracion_veterinarias;
 DROP TABLE IF EXISTS dbo.informacion_sanitaria;
 DROP TABLE IF EXISTS dbo.publicaciones_adopcion;
@@ -14,9 +14,23 @@ DROP TABLE IF EXISTS dbo.rasgos_mascotas;
 DROP TABLE IF EXISTS dbo.refugios;
 DROP TABLE IF EXISTS dbo.veterinarias;
 DROP TABLE IF EXISTS dbo.ciudadanos;
+DROP TABLE IF EXISTS dbo.roles;
 GO
+*/
 
 /* ----------------         TABLAS            ---------------------*/
+
+CREATE TABLE dbo.roles (
+    id_rol  INT             NOT NULL,
+    nombre  VARCHAR(30)     NOT NULL,
+
+    CONSTRAINT pk_roles
+        PRIMARY KEY (id_rol),
+
+    CONSTRAINT uq_roles_nombre
+        UNIQUE (nombre)
+);
+GO
 
 CREATE TABLE dbo.ciudadanos (
     id_ciudadano    INT             NOT NULL,
@@ -28,9 +42,14 @@ CREATE TABLE dbo.ciudadanos (
     telefono        VARCHAR(30),
     domicilio       VARCHAR(200),
     habilitado      CHAR(1)         DEFAULT 'S',
+    id_rol          INT             NOT NULL,
 
     CONSTRAINT pk_ciudadanos
         PRIMARY KEY (id_ciudadano),
+
+    CONSTRAINT fk_ciudadanos_roles
+        FOREIGN KEY (id_rol)
+        REFERENCES dbo.roles (id_rol),
 
     CONSTRAINT uq_ciudadanos_cuil
         UNIQUE (cuil)
@@ -95,7 +114,7 @@ CREATE TABLE dbo.mascotas (
     nro_reg_municipal   VARCHAR(30)     NOT NULL,
     nombre              VARCHAR(100)    NOT NULL,
     sexo                CHAR(1),
-    [a�o_nacimiento]    INT,
+    anio_nacimiento    INT,
     microchip           VARCHAR(50),
     vive                CHAR(1)         DEFAULT 'S',
     id_responsable      INT,
@@ -273,18 +292,27 @@ GO
 
 
 
-INSERT INTO dbo.ciudadanos
-    (id_ciudadano, apellido, nombre, cuil, clave, correo, telefono, domicilio, habilitado)
+INSERT INTO dbo.roles
+    (id_rol, nombre)
 VALUES
-    (100001, 'Perez', 'Juan', '20123456789', 'clave100001', 'juan.perez@gmail.com', '3515551001', 'Av. Colon 1000', 'S'),
-    (100002, 'Gomez', 'Maria', '27234567890', 'clave100002', 'maria.gomez@gmail.com', '3515551002', 'Dean Funes 1200', 'S'),
-    (100003, 'Rodriguez', 'Carlos', '20345678901', 'clave100003', 'carlos.rodriguez@gmail.com', '3515551003', 'La Rioja 800', 'S'),
-    (200001, 'Sanchez', 'Pedro', '20178901234', 'clave200001', 'pedro.sanchez@gmail.com', '3515552001', 'Obispo Trejo 700', 'S'),
-    (200002, 'Lopez', 'Ana', '27289012345', 'clave200002', 'ana.lopez@gmail.com', '3515552002', 'Chacabuco 600', 'S'),
-    (200003, 'Gonzalez', 'Diego', '20390123456', 'clave200003', 'diego.gonzalez@gmail.com', '3515552003', 'Maipu 500', 'S'),
-    (200004, 'Diaz', 'Lucia', '27401234567', 'clave200004', 'lucia.diaz@gmail.com', '3515552004', 'Ituzaingo 1100', 'S'),
-    (300001, 'Fernandez', 'Laura', '27456789012', 'clave300001', 'laura.fernandez@gmail.com', '3515553001', 'Santa Rosa 1500', 'S'),
-    (300002, 'Martinez', 'Sofia', '27567890123', 'clave300002', 'sofia.martinez@gmail.com', '3515553002', 'Ituzaingo 900', 'S');
+    (1, 'CIUDADANO'),
+    (2, 'REFUGIO'),
+    (3, 'VETERINARIA'),
+    (4, 'MUNICIPALIDAD');
+GO
+
+INSERT INTO dbo.ciudadanos
+    (id_ciudadano, apellido, nombre, cuil, clave, correo, telefono, domicilio, habilitado, id_rol)
+VALUES
+    (100001, 'Perez', 'Juan', '20123456789', 'clave100001', 'juan.perez@gmail.com', '3515551001', 'Av. Colon 1000', 'S', 1),
+    (100002, 'Gomez', 'Maria', '27234567890', 'clave100002', 'maria.gomez@gmail.com', '3515551002', 'Dean Funes 1200', 'S', 1),
+    (100003, 'Rodriguez', 'Carlos', '20345678901', 'clave100003', 'carlos.rodriguez@gmail.com', '3515551003', 'La Rioja 800', 'S', 1),
+    (200001, 'Sanchez', 'Pedro', '20178901234', 'clave200001', 'pedro.sanchez@gmail.com', '3515552001', 'Obispo Trejo 700', 'S', 3),
+    (200002, 'Lopez', 'Ana', '27289012345', 'clave200002', 'ana.lopez@gmail.com', '3515552002', 'Chacabuco 600', 'S', 3),
+    (200003, 'Gonzalez', 'Diego', '20390123456', 'clave200003', 'diego.gonzalez@gmail.com', '3515552003', 'Maipu 500', 'S', 3),
+    (200004, 'Diaz', 'Lucia', '27401234567', 'clave200004', 'lucia.diaz@gmail.com', '3515552004', 'Ituzaingo 1100', 'S', 3),
+    (300001, 'Fernandez', 'Laura', '27456789012', 'clave300001', 'laura.fernandez@gmail.com', '3515553001', 'Santa Rosa 1500', 'S', 2),
+    (300002, 'Martinez', 'Sofia', '27567890123', 'clave300002', 'sofia.martinez@gmail.com', '3515553002', 'Ituzaingo 900', 'S', 2);
 GO
 
 INSERT INTO dbo.veterinarias
@@ -345,7 +373,7 @@ VALUES
 GO
 
 INSERT INTO dbo.mascotas
-    (nro_reg_municipal, nombre, sexo, a�o_nacimiento, microchip, vive, id_responsable, id_refugio)
+    (nro_reg_municipal, nombre, sexo, anio_nacimiento, microchip, vive, id_responsable, id_refugio)
 VALUES
     ('MUN-000001', 'Luna', 'H', 2021, '985141000001', 'S', 100001, NULL),
     ('MUN-000002', 'Toby', 'M', 2020, '985141000002', 'S', 100002, NULL),

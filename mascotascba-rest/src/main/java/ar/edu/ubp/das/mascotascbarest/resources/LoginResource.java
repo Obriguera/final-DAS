@@ -2,6 +2,8 @@ package ar.edu.ubp.das.mascotascbarest.resources;
 
 import ar.edu.ubp.das.mascotascbarest.BE.LoginDataBE;
 import ar.edu.ubp.das.mascotascbarest.repositories.LoginRepository;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,15 +19,24 @@ public class LoginResource {
     private LoginRepository repository;
 
     @PostMapping
-    public ResponseEntity<LoginDataBE> login(@RequestBody LoginDataBE datos) {
-        LoginDataBE sesion = repository.autenticar(datos.getCuil(), datos.getClave());
+    public ResponseEntity<LoginDataBE> login(@RequestBody LoginDataBE datos, HttpServletRequest request) {
+        if (datos.getCuil() == null || datos.getCuil().isBlank()
+                || datos.getClave() == null || datos.getClave().isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
 
-        if (sesion == null) {
+        LoginDataBE usuario = repository.autenticar(datos.getCuil().trim(), datos.getClave());
+
+        if (usuario == null) {
             return ResponseEntity.status(401).build();
         }
 
-        sesion.setClave(null);
+        HttpSession session = request.getSession();
+        request.changeSessionId();
+        session.setAttribute("idCiudadano", usuario.getIdCiudadano());
+        session.setAttribute("idRefugio", usuario.getIdRefugio());
+        session.setAttribute("rol", usuario.getRol());
 
-        return ResponseEntity.ok(sesion);
+        return ResponseEntity.ok(usuario);
     }
 }

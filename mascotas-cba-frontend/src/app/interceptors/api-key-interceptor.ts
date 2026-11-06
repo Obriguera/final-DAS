@@ -1,19 +1,26 @@
-import { HttpInterceptorFn } from '@angular/common/http';
-import { inject } from '@angular/core';
-import { environment } from '../environments/environments';
-import { SesionService } from '../services/sesion-service';
+import { HttpErrorResponse, HttpInterceptorFn } from "@angular/common/http";
+import { inject } from "@angular/core";
+import { Router } from "@angular/router";
+import { catchError, throwError } from "rxjs";
+import { environment } from "../environments/environments";
+import { SesionService } from "../services/sesion-service";
 
 export const apiKeyInterceptor: HttpInterceptorFn = (req, next) => {
-  const sesion = inject(SesionService).sesion();
+  const sesion = inject(SesionService);
+  const router = inject(Router);
 
-  // El backend identifica al usuario y a su refugio con los ids devueltos por el login.
   const authReq = req.clone({
-    setHeaders: {
-      'X-API-Key': environment.apiKey,
-      ...(sesion?.idCiudadano ? { 'X-Id-Ciudadano': sesion.idCiudadano } : {}),
-      ...(sesion?.idRefugio ? { 'X-Id-Refugio': sesion.idRefugio } : {})
-    }
+    setHeaders: { "X-API-Key": environment.apiKey },
+    withCredentials: true,
   });
 
-  return next(authReq);
+  return next(authReq).pipe(
+    catchError((error: HttpErrorResponse) => {
+      if (error.status === 401 && !req.url.endsWith("/login")) {
+        sesion.logout();
+        router.navigate(["/"]);
+      }
+      return throwError(() => error);
+    }),
+  );
 };

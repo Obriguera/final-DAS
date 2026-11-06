@@ -1,19 +1,20 @@
-import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { environment } from '../environments/environments';
+import { Injectable, inject } from "@angular/core";
+import { HttpClient } from "@angular/common/http";
+import { Observable } from "rxjs";
+import { environment } from "../environments/environments";
 
-export type EstadoPublicacion = 'ACTIVA' | 'PAUSADA' | 'FINALIZADA';
-export type AccionPublicacion = 'ACTIVAR' | 'PAUSAR' | 'FINALIZAR';
+export type EstadoPublicacion = "ACTIVA" | "PAUSADA" | "FINALIZADA";
+export type AccionPublicacion = "ACTIVAR" | "PAUSAR" | "FINALIZAR";
 
 export interface IPublicacion {
-  nroPublicacion: string;
+  nroPublicacion: number;
   nroRegMunicipal: string;
   nombre: string;
   especie: string;
-  sexo: 'H' | 'M';
+  raza: string | null;
+  sexo: string;
+  anioNacimiento: number | null;
   edad: number | null;
-  raza?: string | null;
   caracteristicasMascota: string;
   condicionAdopcion: string;
   foto: string;
@@ -21,24 +22,31 @@ export interface IPublicacion {
   fechaPublicacion: string;
 }
 
+export interface ISexo {
+  codigo: string;
+  nombre: string;
+}
+
 export interface INuevaPublicacion {
   nombre: string;
   especie: string;
   sexo: string;
-  edadAproximada: string;
-  raza: string;
+  edadAproximada?: string;
+  raza?: string;
   caracteristicasMascota: string;
   condicionAdopcion: string;
   foto: string;
 }
 
-export interface IResultadoPublicacion {
-  resultado: 'OK' | 'ERROR';
-  codigo?: string;
-  mensaje?: string;
-  nroPublicacion?: string;
-  nroRegMunicipal?: string;
-  estadoPublicacion?: EstadoPublicacion;
+export interface ICambioEstado {
+  nroPublicacion: number;
+  accion: AccionPublicacion;
+}
+
+export type IResultadoCrear = Record<string, unknown>;
+
+export interface IResultadoEstado {
+  estadoPublicacion: EstadoPublicacion;
 }
 
 @Injectable()
@@ -50,11 +58,27 @@ export class PublicacionesResource {
     return this.http.get<IPublicacion[]>(this.apiUrl);
   }
 
-  crearPublicacion(datos: INuevaPublicacion): Observable<IResultadoPublicacion> {
-    return this.http.post<IResultadoPublicacion>(this.apiUrl, datos);
+  getEspecies(): Observable<string[]> {
+    return this.http.get<string[]>(`${this.apiUrl}/especies`);
   }
 
-  cambiarEstado(nroPublicacion: string, accion: AccionPublicacion): Observable<IResultadoPublicacion> {
-    return this.http.patch<IResultadoPublicacion>(`${this.apiUrl}/estado`, { nroPublicacion, accion });
+  getRazas(): Observable<string[]> {
+    return this.http.get<string[]>(`${this.apiUrl}/razas`);
+  }
+
+  getSexos(): Observable<ISexo[]> {
+    return this.http.get<ISexo[]>(`${this.apiUrl}/sexos`);
+  }
+
+  crearPublicacion(datos: INuevaPublicacion): Observable<IResultadoCrear> {
+    return this.http.post<IResultadoCrear>(this.apiUrl, datos);
+  }
+
+  cambiarEstado(
+    nroPublicacion: number,
+    accion: AccionPublicacion,
+  ): Observable<IResultadoEstado> {
+    const cambio: ICambioEstado = { nroPublicacion, accion };
+    return this.http.patch<IResultadoEstado>(`${this.apiUrl}/estado`, cambio);
   }
 }

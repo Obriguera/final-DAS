@@ -1,11 +1,17 @@
 package ar.edu.ubp.das.mascotascbasoap.be;
 
 public class LoginDataBE {
+
     private String cuil;
     private String clave;
-    private String idCiudadano;
-    private String idRefugio;
+
+    private Integer idCiudadano;
+    private Integer idRefugio;
+
+    private String apellido;
+    private String nombre;
     private String razonSocial;
+    private String rol;
 
     public String getCuil() {
         return cuil;
@@ -23,20 +29,36 @@ public class LoginDataBE {
         this.clave = clave;
     }
 
-    public String getIdCiudadano() {
+    public Integer getIdCiudadano() {
         return idCiudadano;
     }
 
-    public void setIdCiudadano(String idCiudadano) {
+    public void setIdCiudadano(Integer idCiudadano) {
         this.idCiudadano = idCiudadano;
     }
 
-    public String getIdRefugio() {
+    public Integer getIdRefugio() {
         return idRefugio;
     }
 
-    public void setIdRefugio(String idRefugio) {
+    public void setIdRefugio(Integer idRefugio) {
         this.idRefugio = idRefugio;
+    }
+
+    public String getApellido() {
+        return apellido;
+    }
+
+    public void setApellido(String apellido) {
+        this.apellido = apellido;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
     }
 
     public String getRazonSocial() {
@@ -45,5 +67,13 @@ public class LoginDataBE {
 
     public void setRazonSocial(String razonSocial) {
         this.razonSocial = razonSocial;
+    }
+
+    public String getRol() {
+        return rol;
+    }
+
+    public void setRol(String rol) {
+        this.rol = rol;
     }
 }
