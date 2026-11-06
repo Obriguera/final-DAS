@@ -1,25 +1,32 @@
 package ar.edu.ubp.das.mascotascbasoap.be;
 
-
+import java.time.Year;
 import java.util.Date;
 
 public class PublicacionBE {
 
-    private String nroPublicacion;
+    private Integer nroPublicacion;
     private String nroRegMunicipal;
+
     private String nombre;
+    private String especie;
+    private String raza;
     private String sexo;
+
+    private Integer anioNacimiento;
+
     private String caracteristicasMascota;
     private String condicionAdopcion;
     private String foto;
+
     private String estadoPublicacion;
     private Date fechaPublicacion;
 
-    public String getNroPublicacion() {
+    public Integer getNroPublicacion() {
         return nroPublicacion;
     }
 
-    public void setNroPublicacion(String nroPublicacion) {
+    public void setNroPublicacion(Integer nroPublicacion) {
         this.nroPublicacion = nroPublicacion;
     }
 
@@ -39,12 +46,42 @@ public class PublicacionBE {
         this.nombre = nombre;
     }
 
+    public String getEspecie() {
+        return especie;
+    }
+
+    public void setEspecie(String especie) {
+        this.especie = especie;
+    }
+
+    public String getRaza() {
+        return raza;
+    }
+
+    public void setRaza(String raza) {
+        this.raza = raza;
+    }
+
     public String getSexo() {
         return sexo;
     }
 
     public void setSexo(String sexo) {
         this.sexo = sexo;
+    }
+
+    public Integer getAnioNacimiento() {
+        return anioNacimiento;
+    }
+
+    public void setAnioNacimiento(Integer anioNacimiento) {
+        this.anioNacimiento = anioNacimiento;
+    }
+
+    public Integer getEdad() {
+        return anioNacimiento == null
+                ? null
+                : Year.now().getValue() - anioNacimiento;
     }
 
     public String getCaracteristicasMascota() {

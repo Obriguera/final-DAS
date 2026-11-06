@@ -16,16 +16,27 @@ public class WebServiceConfig {
     @Value("${security.api-key}")
     private String apiKey;
 
-    public WebServiceConfig(Bus bus, IMascotasCbaWebService mascotasWebService) {
+    public WebServiceConfig(
+            Bus bus,
+            IMascotasCbaWebService mascotasWebService) {
+
         this.bus = bus;
         this.mascotasWebService = mascotasWebService;
     }
 
     @Bean
     public EndpointImpl endpoint() {
-        EndpointImpl endpoint = new EndpointImpl(bus, mascotasWebService);
 
-        endpoint.getInInterceptors().add(new ApiKeyInterceptor(apiKey));
+        EndpointImpl endpoint =
+                new EndpointImpl(
+                        bus,
+                        mascotasWebService
+                );
+
+        endpoint.getInInterceptors()
+                .add(
+                        new ApiKeyInterceptor(apiKey)
+                );
 
         endpoint.publish("/integracion");
 

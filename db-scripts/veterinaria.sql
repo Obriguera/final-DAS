@@ -1,6 +1,6 @@
 USE veterinaria;
 GO
-
+/*
 DROP TABLE IF EXISTS dbo.detalle_atencion_sanitaria;
 DROP TABLE IF EXISTS dbo.atencion_sanitaria;
 DROP TABLE IF EXISTS dbo.responsables_mascotas;
@@ -13,7 +13,7 @@ DROP TABLE IF EXISTS dbo.tipos_atencion_sanitaria;
 DROP TABLE IF EXISTS dbo.configuracion_sistema;
 DROP TABLE IF EXISTS dbo.personas;
 GO
-
+*/
 
 CREATE TABLE personas (
     id_persona      INT             NOT NULL,

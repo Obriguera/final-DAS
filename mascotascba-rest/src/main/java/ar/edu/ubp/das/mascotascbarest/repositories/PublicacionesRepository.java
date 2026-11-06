@@ -15,64 +15,71 @@ public class PublicacionesRepository {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    public List<PublicacionBE> getPublicaciones(
-            String idCiudadano,
-            String idRefugio,
-            String nombre,
-            String estado) {
+    public List<String> getEspecies() {
+        return jdbcTemplate.queryForList("exec dbo.get_especies", String.class);
+    }
 
+    public List<String> getRazas() {
+        return jdbcTemplate.queryForList("exec dbo.get_razas", String.class);
+    }
+
+    public List<PublicacionBE> getPublicaciones(int idRefugio) {
         return jdbcTemplate.query(
-                "exec dbo.get_publicaciones @id_ciudadano=?, @id_refugio=?, @nombre=?, @estado=?",
+                "exec dbo.get_publicaciones @id_refugio=?",
                 new BeanPropertyRowMapper<>(PublicacionBE.class),
-                idCiudadano,
-                idRefugio,
-                nombre,
-                estado
+                idRefugio
         );
     }
 
     public Map<String, Object> crearPublicacion(
-            String idCiudadano,
-            String idRefugio,
+            int idRefugio,
             String nombre,
-            String especie,
             String sexo,
-            String edadAproximada,
+            Integer anioNacimiento,
+            String especie,
             String raza,
-            String descripcion,
-            String condiciones,
+            String caracteristicasMascota,
+            String condicionAdopcion,
             String foto) {
 
         return jdbcTemplate.queryForMap(
                 "exec dbo.crear_publicacion "
-                        + "@id_ciudadano=?, @id_refugio=?, @nombre=?, @especie=?, @sexo=?, "
-                        + "@edad_aproximada=?, @raza=?, @caracteristicas_mascota=?, "
-                        + "@condicion_adopcion=?, @foto=?",
-                idCiudadano,
+                        + "@id_refugio=?, @nombre=?, @sexo=?, @anio_nacimiento=?, @especie=?, @raza=?, "
+                        + "@caracteristicas_mascota=?, @condicion_adopcion=?, @foto=?",
                 idRefugio,
                 nombre,
-                especie,
                 sexo,
-                edadAproximada,
+                anioNacimiento,
+                especie,
                 raza,
-                descripcion,
-                condiciones,
+                caracteristicasMascota,
+                condicionAdopcion,
                 foto
         );
     }
 
-    public Map<String, Object> cambiarEstado(
-            String nroPublicacion,
-            String idCiudadano,
-            String idRefugio,
-            String accion) {
-
-        return jdbcTemplate.queryForMap(
-                "exec dbo.act_estado_publicacion @nro_publicacion=?, @id_ciudadano=?, @id_refugio=?, @accion=?",
+    public String getEstado(int nroPublicacion, int idRefugio) {
+        List<String> estados = jdbcTemplate.queryForList(
+                "exec dbo.get_estado_publicacion @nro_publicacion=?, @id_refugio=?",
+                String.class,
                 nroPublicacion,
-                idCiudadano,
-                idRefugio,
-                accion
+                idRefugio
         );
+
+        return estados.isEmpty() ? null : estados.get(0);
+    }
+
+    public boolean cambiarEstado(int nroPublicacion, int idRefugio, String estadoActual, String estadoNuevo) {
+        Integer filas = jdbcTemplate.queryForObject(
+                "exec dbo.act_estado_publicacion "
+                        + "@nro_publicacion=?, @id_refugio=?, @estado_actual=?, @estado_nuevo=?",
+                Integer.class,
+                nroPublicacion,
+                idRefugio,
+                estadoActual,
+                estadoNuevo
+        );
+
+        return filas != null && filas > 0;
     }
 }

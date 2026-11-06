@@ -15,13 +15,16 @@ public class LoginRepository {
     private JdbcTemplate jdbcTemplate;
 
     public LoginDataBE autenticar(String cuil, String clave) {
+
         List<LoginDataBE> resultado = jdbcTemplate.query(
-                "exec dbo.aut_usuario ?, ?",
+                "exec dbo.aut_usuario @cuil=?, @clave=?",
                 new BeanPropertyRowMapper<>(LoginDataBE.class),
                 cuil,
                 clave
         );
 
-        return resultado.isEmpty() ? null : resultado.get(0);
+        return resultado.isEmpty()
+                ? null
+                : resultado.get(0);
     }
 }

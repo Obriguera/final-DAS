@@ -73,7 +73,7 @@
           <article class="card h-100 shadow-sm border-0 publicacion"
                    [class.finalizada]="publicacion.estadoPublicacion === 'FINALIZADA'">
             <div class="position-relative">
-              <img [src]="fotoUrl(publicacion.foto)" [alt]="'Foto de ' + publicacion.nombre"
+              <img [src]="fotoUrl(publicacion)" [alt]="'Foto de ' + publicacion.nombre"
                    class="card-img-top foto" (error)="onFotoError($event)" />
               <span class="badge position-absolute top-0 end-0 m-2" [class]="estadoClase(publicacion.estadoPublicacion)">
                 {{ estadoTexto(publicacion.estadoPublicacion) }}
@@ -109,7 +109,7 @@
                 <div class="mt-auto d-flex justify-content-end gap-2">
                   @for (accion of accionesDisponibles(publicacion); track accion) {
                     <button type="button" class="btn btn-sm" [class]="accionClase(accion)"
-                            [disabled]="procesando() === publicacion.nroRegMunicipal"
+                            [disabled]="procesando() === publicacion.nroPublicacion"
                             (click)="cambiarEstado(publicacion, accion)">
                       {{ accionTexto(accion) }}
                     </button>

@@ -3,9 +3,6 @@ import { isPlatformBrowser } from '@angular/common';
 
 export interface UsuarioSesion {
   cuil?: string | null;
-  idCiudadano?: string | null;
-  idRefugio?: string | null;
-  idVeterinaria?: string | null;
   razonSocial?: string | null;
   rol: string;
 }
@@ -42,8 +39,7 @@ export class SesionService {
   }
 
   esRefugio(): boolean {
-    const sesion = this.sesion();
-    return sesion?.rol === 'REFUGIO' && !!sesion.idRefugio;
+    return this.sesion()?.rol === 'REFUGIO';
   }
 
   private leer(): UsuarioSesion | null {
