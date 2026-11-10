@@ -4,7 +4,9 @@ import { NuevaPublicacion } from "../nueva-publicacion/nueva-publicacion";
 import {
   AccionPublicacion,
   EstadoPublicacion,
+  INuevaPublicacion,
   IPublicacion,
+  ISexo,
   PublicacionesResource,
 } from "../../services/publicaciones-resource";
 
@@ -18,7 +20,6 @@ const FOTO_POR_DEFECTO = "img/sin-foto.svg";
 
 @Component({
   imports: [Navbar, NuevaPublicacion],
-  providers: [PublicacionesResource],
   selector: "app-publicaciones-component",
   styleUrl: "./publicaciones-component.scss",
   templateUrl: "./publicaciones-component.html",
@@ -34,6 +35,13 @@ export class PublicacionesComponent implements OnInit {
   successMessage = signal<string | null>(null);
   mostrarFormulario = signal(false);
   procesando = signal<number | null>(null);
+
+  // Opciones para el formulario modal
+  especies = signal<string[]>([]);
+  razas = signal<string[]>([]);
+  sexos = signal<ISexo[]>([]);
+  guardandoPublicacion = signal(false);
+  errorModal = signal<string | null>(null);
 
   filtroNombre = signal("");
   filtroEstado = signal<EstadoPublicacion | "">("");
@@ -51,6 +59,22 @@ export class PublicacionesComponent implements OnInit {
 
   ngOnInit(): void {
     this.cargarPublicaciones();
+    this.cargarOpcionesFormulario();
+  }
+
+  cargarOpcionesFormulario(): void {
+    this.publicacionesResource.getEspecies().subscribe({
+      next: (v) => this.especies.set(v),
+      error: (e) => console.error("Error al cargar especies:", e),
+    });
+    this.publicacionesResource.getRazas().subscribe({
+      next: (v) => this.razas.set(v),
+      error: (e) => console.error("Error al cargar razas:", e),
+    });
+    this.publicacionesResource.getSexos().subscribe({
+      next: (v) => this.sexos.set(v),
+      error: (e) => console.error("Error al cargar sexos:", e),
+    });
   }
 
   cargarPublicaciones(): void {
@@ -109,7 +133,6 @@ export class PublicacionesComponent implements OnInit {
             error,
             "No se pudo cambiar el estado de la publicación.",
           );
-          // Si el estado cambió en otro lado, se refresca el listado
           if (error.status === 409 || error.status === 404) {
             this.cargarPublicaciones();
           }
@@ -118,14 +141,57 @@ export class PublicacionesComponent implements OnInit {
   }
 
   abrirFormulario(): void {
+    this.errorModal.set(null);
     this.successMessage.set(null);
     this.mostrarFormulario.set(true);
   }
 
-  onPublicada(): void {
-    this.mostrarFormulario.set(false);
-    this.successMessage.set("La publicación se registró correctamente.");
-    this.cargarPublicaciones();
+  onCrearPublicacion(evento: {
+    datos: INuevaPublicacion;
+    fotoBase64: string | null;
+  }): void {
+    this.guardandoPublicacion.set(true);
+    this.errorModal.set(null);
+
+    this.publicacionesResource.crearPublicacion(evento.datos).subscribe({
+      next: (resultado) => {
+        if (evento.fotoBase64 && typeof localStorage !== "undefined") {
+          try {
+            const nombreNormalizado = evento.datos.nombre.trim().toLowerCase();
+            localStorage.setItem(`foto_${nombreNormalizado}`, evento.fotoBase64);
+
+            const nroReg = resultado?.["nroRegMunicipal"];
+            const nroPub = resultado?.["nroPublicacion"];
+            if (nroReg) {
+              localStorage.setItem(`foto_${nroReg}`, evento.fotoBase64);
+            }
+            if (nroPub) {
+              localStorage.setItem(`foto_${nroPub}`, evento.fotoBase64);
+            }
+          } catch (e) {
+            console.warn("No se pudo guardar la foto en localStorage:", e);
+          }
+        }
+
+        this.guardandoPublicacion.set(false);
+        this.mostrarFormulario.set(false);
+        this.successMessage.set("La publicación se registró correctamente.");
+        this.cargarPublicaciones();
+      },
+      error: (error) => {
+        console.error("Error al crear la publicación:", error);
+        this.guardandoPublicacion.set(false);
+        if (error.status === 401) {
+          return;
+        }
+        this.errorModal.set(
+          error.status === 403
+            ? "No tiene permisos para realizar esta operación."
+            : (error.error?.mensaje ??
+                "No se pudo registrar la publicación. Intente nuevamente."),
+        );
+      },
+    });
   }
 
   onFiltroNombre(event: Event): void {
@@ -224,7 +290,6 @@ export class PublicacionesComponent implements OnInit {
     error: { status?: number; error?: { mensaje?: string } },
     porDefecto: string,
   ): void {
-    // 401 lo resuelve el interceptor (vuelve al login)
     if (error.status === 401) {
       return;
     }

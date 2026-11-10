@@ -32,6 +32,7 @@ export interface INuevaPublicacion {
   especie: string;
   sexo: string;
   edadAproximada?: string;
+  anioNacimiento?: number | null;
   raza?: string;
   caracteristicasMascota: string;
   condicionAdopcion: string;
@@ -49,7 +50,9 @@ export interface IResultadoEstado {
   estadoPublicacion: EstadoPublicacion;
 }
 
-@Injectable()
+@Injectable({
+  providedIn: "root",
+})
 export class PublicacionesResource {
   private http = inject(HttpClient);
   private readonly apiUrl = `${environment.apiUrl}/publicaciones`;

@@ -68,7 +68,7 @@
     </div>
   } @else {
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-      @for (publicacion of publicacionesFiltradas(); track publicacion.nroRegMunicipal) {
+      @for (publicacion of publicacionesFiltradas(); track publicacion.nroPublicacion) {
         <div class="col">
           <article class="card h-100 shadow-sm border-0 publicacion"
                    [class.finalizada]="publicacion.estadoPublicacion === 'FINALIZADA'">
@@ -93,7 +93,13 @@
 
               <div class="d-flex flex-wrap gap-2 mb-2">
                 <span class="badge rounded-pill text-bg-light border fw-normal">{{ sexoTexto(publicacion.sexo) }}</span>
-                <span class="badge rounded-pill text-bg-light border fw-normal">{{ edadTexto(publicacion.edad) }}</span>
+                @if (publicacion.anioNacimiento) {
+                  <span class="badge rounded-pill text-bg-light border fw-normal" title="Año de nacimiento y edad estimada">
+                    Nac: {{ publicacion.anioNacimiento }} ({{ edadTexto(publicacion.edad) }})
+                  </span>
+                } @else {
+                  <span class="badge rounded-pill text-bg-light border fw-normal">{{ edadTexto(publicacion.edad) }}</span>
+                }
                 @if (publicacion.raza) {
                   <span class="badge rounded-pill text-bg-light border fw-normal">{{ publicacion.raza }}</span>
                 }
@@ -127,5 +133,12 @@
 </main>
 
 @if (mostrarFormulario()) {
-  <app-nueva-publicacion (publicada)="onPublicada()" (cancelada)="mostrarFormulario.set(false)" />
+  <app-nueva-publicacion
+    [especies]="especies()"
+    [razas]="razas()"
+    [sexos]="sexos()"
+    [enviando]="guardandoPublicacion()"
+    [errorMessage]="errorModal()"
+    (guardar)="onCrearPublicacion($event)"
+    (cancelada)="mostrarFormulario.set(false)" />
 }

@@ -45,11 +45,53 @@
             <div class="invalid-feedback">Seleccione el sexo.</div>
           </div>
 
-          <div class="col-12 col-md-4">
-            <label for="edadAproximada" class="form-label">Edad aproximada</label>
-            <input id="edadAproximada" type="text" class="form-control" formControlName="edadAproximada"
-                   placeholder="Ej: 2 años" [class.is-invalid]="esInvalido('edadAproximada')" />
-            <div class="invalid-feedback">Ingrese un número, por ejemplo: 2 años o 6 meses.</div>
+          <!-- Selector de Año tipo calendario -->
+          <div class="col-12 col-md-4 position-relative">
+            <label for="anioNacimiento" class="form-label">Año de nacimiento</label>
+            <div class="input-group">
+              <input id="anioNacimiento" type="text" class="form-control bg-white" readonly
+                     [value]="publicacionForm.controls.anioNacimiento.value ?? ''"
+                     placeholder="Seleccionar año..."
+                     (click)="toggleCalendarioAnio()"
+                     [class.is-invalid]="esInvalido('anioNacimiento')" />
+              <button class="btn btn-outline-secondary" type="button" (click)="toggleCalendarioAnio()" title="Abrir selector de año">
+                📅
+              </button>
+              @if (publicacionForm.controls.anioNacimiento.value) {
+                <button class="btn btn-outline-secondary" type="button" (click)="limpiarAnio($event)" title="Limpiar año">
+                  ✕
+                </button>
+              }
+            </div>
+            <div class="form-text">Podés elegir el año aproximado de nacimiento.</div>
+            <div class="invalid-feedback">Año de nacimiento inválido.</div>
+
+            <!-- Popover de calendario de selección de año -->
+            @if (mostrarCalendarioAnio()) {
+              <div class="calendario-anios-popover card shadow p-3 position-absolute z-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <button type="button" class="btn btn-sm btn-outline-secondary px-2" (click)="navegarDecada(-1)" title="Década anterior">‹</button>
+                  <span class="fw-bold small">{{ decadaActual() }} - {{ decadaActual() + 11 }}</span>
+                  <button type="button" class="btn btn-sm btn-outline-secondary px-2" (click)="navegarDecada(1)" [disabled]="decadaActual() >= anioMaximo" title="Década siguiente">›</button>
+                </div>
+                <div class="grid-anios">
+                  @for (anio of aniosDecada(); track anio) {
+                    <button type="button" class="btn btn-sm"
+                            [class.btn-success]="publicacionForm.controls.anioNacimiento.value === anio"
+                            [class.btn-outline-secondary]="publicacionForm.controls.anioNacimiento.value !== anio"
+                            [disabled]="anio > anioMaximo || anio < anioMinimo"
+                            (click)="seleccionarAnio(anio)">
+                      {{ anio }}
+                    </button>
+                  }
+                </div>
+                <div class="mt-2 pt-2 border-top text-end">
+                  <button type="button" class="btn btn-sm btn-link text-muted p-0 text-decoration-none" (click)="mostrarCalendarioAnio.set(false)">
+                    Cerrar
+                  </button>
+                </div>
+              </div>
+            }
           </div>
         </div>
 

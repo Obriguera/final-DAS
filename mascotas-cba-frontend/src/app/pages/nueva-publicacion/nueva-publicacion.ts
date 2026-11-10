@@ -1,8 +1,8 @@
 import {
   Component,
   OnDestroy,
-  OnInit,
-  inject,
+  computed,
+  input,
   output,
   signal,
 } from "@angular/core";
@@ -15,7 +15,6 @@ import {
 import {
   INuevaPublicacion,
   ISexo,
-  PublicacionesResource,
 } from "../../services/publicaciones-resource";
 
 @Component({
@@ -24,20 +23,37 @@ import {
   styleUrl: "./nueva-publicacion.scss",
   templateUrl: "./nueva-publicacion.html",
 })
-export class NuevaPublicacion implements OnInit, OnDestroy {
-  private publicacionesResource = inject(PublicacionesResource);
+export class NuevaPublicacion implements OnDestroy {
+  // Inputs basados en signals para mantener el componente desacoplado del backend
+  readonly especies = input<string[]>([]);
+  readonly razas = input<string[]>([]);
+  readonly sexos = input<ISexo[]>([]);
+  readonly enviando = input<boolean>(false);
+  readonly errorMessage = input<string | null>(null);
 
-  readonly publicada = output<void>();
+  readonly guardar = output<{
+    datos: INuevaPublicacion;
+    fotoBase64: string | null;
+  }>();
   readonly cancelada = output<void>();
 
-  especies = signal<string[]>([]);
-  razas = signal<string[]>([]);
-  sexos = signal<ISexo[]>([]);
-
-  errorMessage = signal<string | null>(null);
-  enviando = signal(false);
   vistaPrevia = signal<string | null>(null);
   private fotoBase64: string | null = null;
+
+  // Estado del selector de año tipo calendario
+  mostrarCalendarioAnio = signal(false);
+  readonly anioMaximo: number = new Date().getFullYear();
+  readonly anioMinimo: number = 1995;
+  decadaActual = signal(Math.floor(new Date().getFullYear() / 10) * 10);
+
+  aniosDecada = computed(() => {
+    const decada = this.decadaActual();
+    const anios: number[] = [];
+    for (let i = 0; i < 12; i++) {
+      anios.push(decada + i);
+    }
+    return anios;
+  });
 
   publicacionForm = new FormGroup({
     nombre: new FormControl<string>("", {
@@ -52,10 +68,10 @@ export class NuevaPublicacion implements OnInit, OnDestroy {
       nonNullable: true,
       validators: [Validators.required],
     }),
-    edadAproximada: new FormControl<string>("", {
-      nonNullable: true,
-      validators: [Validators.pattern(/^\s*\d+(\s+\D.*)?$/)],
-    }),
+    anioNacimiento: new FormControl<number | null>(null, [
+      Validators.min(1995),
+      Validators.max(new Date().getFullYear()),
+    ]),
     raza: new FormControl<string>("", {
       nonNullable: true,
       validators: [Validators.maxLength(200)],
@@ -74,22 +90,26 @@ export class NuevaPublicacion implements OnInit, OnDestroy {
     }),
   });
 
-  ngOnInit(): void {
-    const falla = (error: unknown) => {
-      console.error("Error al cargar los datos del formulario:", error);
-      this.errorMessage.set(
-        "No se pudieron cargar las opciones del formulario.",
-      );
-    };
-    this.publicacionesResource
-      .getEspecies()
-      .subscribe({ next: (v) => this.especies.set(v), error: falla });
-    this.publicacionesResource
-      .getRazas()
-      .subscribe({ next: (v) => this.razas.set(v), error: falla });
-    this.publicacionesResource
-      .getSexos()
-      .subscribe({ next: (v) => this.sexos.set(v), error: falla });
+  toggleCalendarioAnio(): void {
+    this.mostrarCalendarioAnio.update((v) => !v);
+  }
+
+  navegarDecada(delta: number): void {
+    this.decadaActual.update((d) => d + delta * 10);
+  }
+
+  seleccionarAnio(anio: number): void {
+    this.publicacionForm.controls.anioNacimiento.setValue(anio);
+    this.publicacionForm.controls.anioNacimiento.markAsTouched();
+    this.mostrarCalendarioAnio.set(false);
+  }
+
+  limpiarAnio(event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+    }
+    this.publicacionForm.controls.anioNacimiento.setValue(null);
+    this.publicacionForm.controls.anioNacimiento.markAsTouched();
   }
 
   onFotoSeleccionada(event: Event): void {
@@ -150,57 +170,34 @@ export class NuevaPublicacion implements OnInit, OnDestroy {
   }
 
   onSubmit(): void {
-    this.errorMessage.set(null);
-
     if (this.publicacionForm.invalid) {
       this.publicacionForm.markAllAsTouched();
       return;
     }
 
-    this.enviando.set(true);
     const valores = this.publicacionForm.getRawValue();
+    const anio = valores.anioNacimiento;
+    const edadCalculada = anio ? this.anioMaximo - anio : null;
+    const edadAproximada =
+      edadCalculada !== null && edadCalculada >= 0
+        ? `${edadCalculada} anios`
+        : undefined;
+
     const datos: INuevaPublicacion = {
-      ...valores,
-      edadAproximada: valores.edadAproximada.trim() || undefined,
-      raza: valores.raza || undefined,
+      nombre: valores.nombre.trim(),
+      especie: valores.especie,
+      sexo: valores.sexo,
+      anioNacimiento: anio,
+      edadAproximada,
+      raza: valores.raza ? valores.raza.trim() : undefined,
+      caracteristicasMascota: valores.caracteristicasMascota.trim(),
+      condicionAdopcion: valores.condicionAdopcion.trim(),
+      foto: valores.foto,
     };
 
-    this.publicacionesResource.crearPublicacion(datos).subscribe({
-      next: (resultado) => {
-        if (this.fotoBase64 && typeof localStorage !== "undefined") {
-          try {
-            const nombreNormalizado = datos.nombre.trim().toLowerCase();
-            localStorage.setItem(`foto_${nombreNormalizado}`, this.fotoBase64);
-
-            const nroReg = resultado?.["nroRegMunicipal"];
-            const nroPub = resultado?.["nroPublicacion"];
-            if (nroReg) {
-              localStorage.setItem(`foto_${nroReg}`, this.fotoBase64);
-            }
-            if (nroPub) {
-              localStorage.setItem(`foto_${nroPub}`, this.fotoBase64);
-            }
-          } catch (e) {
-            console.warn("No se pudo guardar la foto en localStorage:", e);
-          }
-        }
-
-        this.enviando.set(false);
-        this.publicada.emit();
-      },
-      error: (error) => {
-        console.error("Error al crear la publicación:", error);
-        this.enviando.set(false);
-        if (error.status === 401) {
-          return;
-        }
-        this.errorMessage.set(
-          error.status === 403
-            ? "No tiene permisos para realizar esta operación."
-            : (error.error?.mensaje ??
-                "No se pudo registrar la publicación. Intente nuevamente."),
-        );
-      },
+    this.guardar.emit({
+      datos,
+      fotoBase64: this.fotoBase64,
     });
   }
 
