@@ -30,7 +30,6 @@ export class PublicacionesComponent implements OnInit {
   readonly estados: EstadoPublicacion[] = ["ACTIVA", "PAUSADA", "FINALIZADA"];
 
   publicaciones = signal<IPublicacion[]>([]);
-  cargando = signal(true);
   errorMessage = signal<string | null>(null);
   successMessage = signal<string | null>(null);
   mostrarFormulario = signal(false);
@@ -78,15 +77,12 @@ export class PublicacionesComponent implements OnInit {
   }
 
   cargarPublicaciones(): void {
-    this.cargando.set(true);
     this.publicacionesResource.getPublicaciones().subscribe({
       next: (publicaciones) => {
         this.publicaciones.set(publicaciones);
-        this.cargando.set(false);
       },
       error: (error) => {
         console.error("Error al obtener las publicaciones:", error);
-        this.cargando.set(false);
         this.manejarError(error, "No se pudieron obtener las publicaciones.");
       },
     });

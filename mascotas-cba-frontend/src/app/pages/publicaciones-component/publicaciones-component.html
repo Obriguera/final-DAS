@@ -52,11 +52,7 @@
   }
 
   <!-- Listado -->
-  @if (cargando()) {
-    <div class="text-center py-5">
-      <div class="spinner-border text-success" role="status"><span class="visually-hidden">Cargando...</span></div>
-    </div>
-  } @else if (publicacionesFiltradas().length === 0) {
+  @if (publicacionesFiltradas().length === 0) {
     <div class="card shadow-sm border-0">
       <div class="card-body text-center text-muted py-5">
         @if (publicaciones().length === 0) {

@@ -149,9 +149,6 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" (click)="cancelada.emit()" [disabled]="enviando()">Cancelar</button>
         <button type="submit" class="btn btn-success" [disabled]="enviando()">
-          @if (enviando()) {
-            <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>
-          }
           Publicar mascota
         </button>
       </div>
