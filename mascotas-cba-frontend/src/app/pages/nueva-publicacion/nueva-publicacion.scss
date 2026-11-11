@@ -3,3 +3,18 @@
   max-width: 100%;
   object-fit: cover;
 }
+
+.calendario-anios-popover {
+  top: calc(100% + 4px);
+  left: 0;
+  width: 260px;
+  background-color: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+}
+
+.grid-anios {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}

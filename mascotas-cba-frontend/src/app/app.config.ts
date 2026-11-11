@@ -4,13 +4,17 @@ import { routes } from './app.routes';
 import { provideClientHydration } from '@angular/platform-browser';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { apiKeyInterceptor } from './interceptors/api-key-interceptor';
+import { loaderInterceptor } from './interceptors/loader-interceptor';
 import { SesionService } from './services/sesion-service';
+import {LoaderService} from './services/loader-service'
 
 export const appConfig: ApplicationConfig = {
   providers: [
+    LoaderService,
     provideBrowserGlobalErrorListeners(),
-    provideRouter(routes), provideClientHydration(),
-    provideHttpClient(withInterceptors([apiKeyInterceptor])),
-    SesionService
-  ]
+    provideRouter(routes),
+    provideClientHydration(),
+    provideHttpClient(withInterceptors([loaderInterceptor, apiKeyInterceptor])),
+    SesionService,
+  ],
 };
