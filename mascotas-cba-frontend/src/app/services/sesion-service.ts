@@ -1,5 +1,8 @@
-import { computed, inject, Injectable, PLATFORM_ID, signal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
+import { computed, inject, Injectable, PLATFORM_ID, signal } from '@angular/core';
+import { Observable } from 'rxjs';
+import { environment } from '../environments/environments';
 
 export interface UsuarioSesion {
   cuil?: string | null;
@@ -10,6 +13,7 @@ export interface UsuarioSesion {
 @Injectable()
 export class SesionService {
   private readonly platformId = inject(PLATFORM_ID);
+  private readonly http = inject(HttpClient);
   private readonly STORAGE_KEY = 'sesion';
 
   private get storage(): Storage | null {
@@ -24,7 +28,11 @@ export class SesionService {
     this.sesion.set(sesion);
   }
 
-  logout(): void {
+  logout(): Observable<void> {
+    return this.http.post<void>(`${environment.apiUrl}/auth/logout`, {}, { withCredentials: true });
+  }
+
+  limpiarSesion(): void {
     this.storage?.removeItem(this.STORAGE_KEY);
     this.sesion.set(null);
   }
@@ -44,9 +52,14 @@ export class SesionService {
 
   private leer(): UsuarioSesion | null {
     const data = this.storage?.getItem(this.STORAGE_KEY);
-    if (!data) return null;
+
+    if (!data) {
+      return null;
+    }
+
     try {
       const parsed = JSON.parse(data);
+
       return typeof parsed?.rol === 'string' ? (parsed as UsuarioSesion) : null;
     } catch {
       return null;
