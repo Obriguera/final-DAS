@@ -75,7 +75,6 @@ mascotascba-soap/
 db-scripts/
 ├── mascotascba.sql                  Esquema principal
 ├── mascotascba - Autenticación.sql  Funciones de autenticación
-├── mascotascba - Funciones.sql      Funciones compartidas
 ├── mascotascba - Publicaciones.sql  Operaciones de publicaciones
 └── veterinaria.sql                  Esquema de veterinaria
 ```
