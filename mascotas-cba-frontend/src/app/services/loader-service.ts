@@ -1,10 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable()
 export class LoaderService {
-  // Estado reactivo que indica si hay peticiones en curso
   readonly isLoading = signal<boolean>(false);
   private activeRequests = 0;
 

@@ -1,21 +1,6 @@
-import {
-  Component,
-  OnDestroy,
-  computed,
-  input,
-  output,
-  signal,
-} from "@angular/core";
-import {
-  FormControl,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators,
-} from "@angular/forms";
-import {
-  INuevaPublicacion,
-  ISexo,
-} from "../../services/publicaciones-resource";
+import { Component, OnDestroy, computed, input, output, signal } from "@angular/core";
+import { FormControl,FormGroup,ReactiveFormsModule,Validators} from "@angular/forms";
+import { INuevaPublicacion, ISexo} from "../../services/publicaciones-resource";
 
 @Component({
   imports: [ReactiveFormsModule],
@@ -24,7 +9,6 @@ import {
   templateUrl: "./nueva-publicacion.html",
 })
 export class NuevaPublicacion implements OnDestroy {
-  // Inputs basados en signals para mantener el componente desacoplado del backend
   readonly especies = input<string[]>([]);
   readonly razas = input<string[]>([]);
   readonly sexos = input<ISexo[]>([]);
