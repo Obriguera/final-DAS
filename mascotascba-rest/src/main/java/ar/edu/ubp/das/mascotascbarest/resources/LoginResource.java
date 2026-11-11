@@ -12,20 +12,24 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/login")
+@RequestMapping("/auth")
 public class LoginResource {
 
     @Autowired
     private LoginRepository repository;
 
-    @PostMapping
-    public ResponseEntity<LoginDataBE> login(@RequestBody LoginDataBE datos, HttpServletRequest request) {
+    @PostMapping("/login")
+    public ResponseEntity<LoginDataBE> login(
+            @RequestBody LoginDataBE datos,
+            HttpServletRequest request) {
+
         if (datos.getCuil() == null || datos.getCuil().isBlank()
                 || datos.getClave() == null || datos.getClave().isEmpty()) {
             return ResponseEntity.badRequest().build();
         }
 
-        LoginDataBE usuario = repository.autenticar(datos.getCuil().trim(), datos.getClave());
+        LoginDataBE usuario =
+                repository.autenticar(datos.getCuil().trim(), datos.getClave());
 
         if (usuario == null) {
             return ResponseEntity.status(401).build();
@@ -33,10 +37,23 @@ public class LoginResource {
 
         HttpSession session = request.getSession();
         request.changeSessionId();
+
         session.setAttribute("idCiudadano", usuario.getIdCiudadano());
         session.setAttribute("idRefugio", usuario.getIdRefugio());
         session.setAttribute("rol", usuario.getRol());
 
         return ResponseEntity.ok(usuario);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(HttpServletRequest request) {
+
+        HttpSession session = request.getSession(false);
+
+        if (session != null) {
+            session.invalidate();
+        }
+
+        return ResponseEntity.noContent().build();
     }
 }
