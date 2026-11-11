@@ -11,10 +11,19 @@ import { SesionService } from '../../services/sesion-service';
 export class Navbar {
   private router = inject(Router);
   private sesionService = inject(SesionService);
+
   protected sesion = this.sesionService.sesion;
 
   cerrarSesion(): void {
-    this.sesionService.logout();
-    this.router.navigate(['/']);
+    this.sesionService.logout().subscribe({
+      next: () => {
+        this.sesionService.limpiarSesion();
+        this.router.navigate(['/']);
+      },
+      error: () => {
+        this.sesionService.limpiarSesion();
+        this.router.navigate(['/']);
+      },
+    });
   }
 }
